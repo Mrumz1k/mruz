@@ -1,0 +1,94 @@
+import tkinter as tk
+from tkinter import messagebox
+
+contacts = []
+
+
+def refresh_list():
+    listbox.delete(0, tk.END)
+    for i, c in enumerate(contacts, 1):
+        listbox.insert(tk.END, f"{i}. {c['name']} — {c['phone']}")
+
+
+def add_contact():
+    name = entry_name.get().strip()
+    phone = entry_phone.get().strip()
+
+    if not name or not phone:
+        messagebox.showerror("Ошибка", "Введите имя и номер")
+        return
+
+    contacts.append({"name": name, "phone": phone})
+
+    entry_name.delete(0, tk.END)
+    entry_phone.delete(0, tk.END)
+
+    refresh_list()
+
+
+def search_contact():
+    query = entry_search.get().strip().lower()
+
+    listbox.delete(0, tk.END)
+
+    found = False
+    for c in contacts:
+        if query in c["name"].lower():
+            listbox.insert(tk.END, f"{c['name']} — {c['phone']}")
+            found = True
+
+    if not found:
+        listbox.insert(tk.END, "Контакт не найден")
+
+
+def show_all():
+    refresh_list()
+
+
+def delete_contact():
+    selected = listbox.curselection()
+
+    if not selected:
+        messagebox.showerror("Ошибка", "Выбери контакт")
+        return
+
+    index = selected[0]
+
+    if index < len(contacts):
+        removed = contacts.pop(index)
+        messagebox.showinfo("Удалено", f"Удалён: {removed['name']}")
+        refresh_list()
+
+
+# ---------------- UI ----------------
+
+root = tk.Tk()
+root.title("Телефонная книга")
+root.geometry("400x500")
+
+# ввод
+tk.Label(root, text="Имя").pack()
+entry_name = tk.Entry(root)
+entry_name.pack()
+
+tk.Label(root, text="Телефон").pack()
+entry_phone = tk.Entry(root)
+entry_phone.pack()
+
+tk.Button(root, text="Добавить", command=add_contact).pack(pady=5)
+
+# поиск
+tk.Label(root, text="Поиск").pack()
+entry_search = tk.Entry(root)
+entry_search.pack()
+
+tk.Button(root, text="Найти", command=search_contact).pack()
+tk.Button(root, text="Показать все", command=show_all).pack(pady=5)
+
+# список
+listbox = tk.Listbox(root, width=50)
+listbox.pack(fill=tk.BOTH, expand=True, pady=10)
+
+tk.Button(root, text="Удалить выбранный", command=delete_contact).pack()
+
+root.mainloop()
